@@ -1,0 +1,2 @@
+# ComponentRepositories
+个人编写的以往项目中封装的组件，所有的皆以text文本的形式储存组件代码，懒得构建项目了
