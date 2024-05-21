@@ -1,0 +1,145 @@
+数字滚动组件
+请注意这里只是一个在vue中的组件并不能独立运行
+
+
+一下为代码内容
+<template>
+  <div style="display: flex">
+    <div v-for="(item, index) in numberList" :key="index" style="display: flex">
+      <div class="Symbol" v-if="isNaN(item)">{{ item }}</div>
+      <div class="number" v-else>
+        <div
+          class="Number"
+          ref="numberItem"
+          :data-number="item"
+          :data-index="index"
+        >
+          <div
+            v-for="(item2, index1) in ArrayS"
+            :key="index1"
+            class="NumberItem"
+          >
+            <div :style="Text">
+              {{ item2 }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+  
+  <script>
+export default {
+  props: {
+    // 滚动的数据
+    value: {
+      type: [String, Number],
+      default: 0,
+    },
+    //   滚动显示的文本样式
+    Text: {
+      type: Object,
+      default(rawProps) {
+        return {};
+      },
+    },
+  },
+  watch: {
+    value(newvalue, oldvalue) {
+      if (oldvalue !== "") {
+        this.OldNumber =
+          oldvalue.length === 1 ? String(oldvalue) : String(oldvalue).split("");
+      }
+      this.$nextTick(() => {
+        this.setNumberTransform();
+      });
+    },
+  },
+  computed: {
+    numberList() {
+      if (this.value.length === 1) {
+        return [String(this.value)];
+      }
+      return String(this.value).split("");
+    },
+  },
+  data() {
+    return {
+      //   滚动展示数据
+      ArrayS: [0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+      // 旧数据
+      OldNumber: [],
+    };
+  },
+  methods: {
+    // 设置每一位数字的偏移
+    setNumberTransform() {
+      this.$forceUpdate();
+      let numberItems = this.$refs.numberItem;
+      let obj = {};
+      // 先回归零位
+      Array.from(numberItems).forEach((c) => {
+        c.style.transform = `translateY(0%)`;
+      });
+      // 滚动动画
+      Array.from(numberItems).forEach((c) => {
+        let key = c.dataset.index;
+        let value = c.dataset.number;
+        let init = 0;
+        obj[key] = setInterval(() => {
+          if (init < value * 10) {
+            init += 1;
+            c.style.transform = `translateY(-${init}%)`;
+          } else {
+            clearInterval(obj[key]);
+            obj[key] = null;
+          }
+        }, 30);
+      });
+    },
+  },
+  mounted() {
+    if (this.numberList.length > 0) {
+      this.setNumberTransform();
+    }
+  },
+};
+</script>
+  
+  <style scoped>
+.Symbol {
+  height: 50px;
+  line-height: 50px;
+  font-size: 20px;
+  font-weight: 550;
+  margin: 0 8px;
+}
+.number {
+  width: 37px;
+  height: 50px;
+  overflow: hidden;
+  border: 2px solid #dbdbdb;
+  border-radius: 4px;
+  margin: 0 6px;
+  box-sizing: border-box;
+}
+.Number {
+  width: 37px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+}
+.Number .NumberItem {
+  width: 37px;
+  height: 50px;
+  line-height: 50px;
+}
+.Number .NumberItem div {
+  color: #000;
+  font-weight: 550;
+  font-size: 24px;
+  text-align: center;
+}
+</style>
