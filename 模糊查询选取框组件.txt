@@ -1,0 +1,168 @@
+模糊查询组件
+组件说明
+请注意该组件运行环境为uniapp
+
+
+以下为代码内容
+
+<template>
+  <view class=" BoxClass " >
+    <view class=" InputBox ">
+      <input type="text" :placeholder-style=" PlaceholderStyle " :placeholder=" pla " v-model="InputText" @focus=" ShowMenuBox = true " 
+      @blur=" CloseBox " >
+      <view class="IconBox" @click=" ShowMenuBox = true " >
+        <uni-icons :type="ShowMenuBox?'top':'bottom' "></uni-icons>
+      </view>
+    </view>
+    
+    <view class="Box" v-show=" ShowMenuBox " >
+      <scroll-view scroll-y="true" >
+        <view class="line" v-for=" item in SArrayS " @click=" ChangeMenu( item ) " >
+          {{ item[KeyName] }}
+        </view>
+      </scroll-view>
+    </view>
+  </view>
+</template>
+
+<script>
+  export default {
+    name:"FuzSearchBox",
+    data() {
+      return {
+        // 显示的选取数据
+        SArrayS:[],
+        // 当前输入的的数据
+        InputText:"",
+        // 是否显示搜索显示框
+        ShowMenuBox:false,
+        // 已选择数据的文本
+        ChangedText:""
+      };
+    },
+    props:{
+      // 需要遍历显示的数据
+      ArrayS:{
+        typeof:Array,
+        default:[]
+      },
+      // 显示的数据属性
+      KeyName:{
+        typeof:String,
+        default:"text"
+      },
+      // 搜索提示文本
+      pla:{
+        typeof:String,
+        default:"请输入搜索关键字"
+      },
+      // 当前数据的下标
+      Index:{
+        typeof:Number,
+        default:null
+      },
+      // input框的提示文本颜色
+      PlaceholderStyle:{
+        typeof:String,
+        default:""
+      }
+    },
+    watch:{
+      // 传入的数据
+      ArrayS:{ 
+        handler(newArray, oldArray ){
+          if(newArray.length!==0){
+            this.SArrayS = this.ArrayS
+          }
+        }
+        ,immediate:true
+      },
+      // 输入的数据
+      InputText:function(newText, oldText ){
+        this.SArrayS=[]
+        for( let i = 0; i < this.ArrayS.length; i++ ){
+          if( this.ArrayS[i][this.KeyName].indexOf(newText) !== -1 ){
+            this.SArrayS.push( this.ArrayS[i] )
+          }
+        }
+        if( newText.length === 0 ){
+          this.SArrayS = this.ArrayS
+        }
+      },
+    },
+    methods:{
+      // 选取某一选项方法
+      // 返回至 ChangeD 事件
+      ChangeMenu(res){
+        this.Changed = true
+        this.InputText = res[this.KeyName]
+        this.ChangedText = this.InputText
+        this.ShowMenuBox = false
+        res["Index"] = this.Index
+        this.$emit( 'ChangeD', res )
+      },
+      // 输入框失去焦点
+      CloseBox(){
+        setTimeout(()=>{
+          this.ShowMenuBox = false 
+          // 修改为原来数据
+          this.InputText = this.ChangedText
+        },100)
+      }
+    }
+    // updated() {
+    //   if(this.ArrayS.length!==0&&this.InputText.length===0){
+    //     this.SArrayS = this.ArrayS
+    //   }
+    // }
+  }
+</script>
+
+<style lang="scss">
+  .BoxClass{
+    padding: 10rpx 0;
+    position: relative;
+  }
+  .InputBox{
+    
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    input{
+      width: 90%;
+      border-radius: 16rpx;
+      padding-left: 8rpx;
+    }
+  }
+  .Box{
+    position: relative;
+    left: 0;
+    top: 0;
+    border: 2px solid #f8f8f8;
+    box-shadow: 4rpx 4rpx 4rpx #f8f8f8;
+    background-color: #ffffff;
+    border-radius: 16rpx;
+    width: 100%;
+    height: 200rpx;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+    margin-top: 10rpx;
+    scroll-view{
+      width: 100%;
+      height: 200rpx;
+      padding: 8rpx 20rpx;
+      background-color: #ffffff;
+      border-radius: 16rpx;
+      .line{
+        width: 100%;
+        background-color: #ffffff;
+        border-bottom: 1px solid #eeeeee;
+        padding: 10rpx 0;
+        text-align: center;
+        color: black;
+      }
+    }
+  }
+</style>
